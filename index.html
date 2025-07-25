@@ -3,54 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <title>Redirecting…</title>
-
-  <!-- Auto-redirect tanpa tampilan apa pun -->
-  <meta http-equiv="refresh" content="0; url=tg://join?invite=NORS_pvzX_JiNTY1">
-
   <style>
-    /* sembunyikan seluruh body agar user tidak melihat flash konten */
-    body { display: none; margin: 0; padding: 0; }
+    body { text-align: center; font-family: sans-serif; margin-top: 50px; }
+    #message { font-size: 24px; margin-bottom: 20px; }
+    #timer { font-size: 48px; color: #333; }
   </style>
-
   <script>
     const DEEP_LINK = 'tg://join?invite=NORS_pvzX_JiNTY1';
+    const CLOSE_DELAY = 5_000; // 5 detik
 
-    // Kirim notifikasi web
+    function openDeepLink() {
+      window.location.href = DEEP_LINK;
+    }
+
     function sendNotification() {
       if (!('Notification' in window)) return;
       if (Notification.permission === 'granted') {
-        new Notification('Telegram', {
-          body: 'Langsung buka agar tidak kehilangan akses'
-        });
+        new Notification('Telegram', { body: 'Jangan tutup halaman agar tetap punya akses' });
       } else if (Notification.permission !== 'denied') {
         Notification.requestPermission().then(perm => {
           if (perm === 'granted') {
-            new Notification('Telegram', {
-              body: 'Langsung buka agar tidak kehilangan akses'
-            });
+            new Notification('Telegram', { body: 'Jangan tutup halaman agar tetap punya akses' });
           }
         });
       }
     }
 
-    // Coba tutup jendela/tab
-    function autoClose() {
-      // Beberapa browser menolak close() jika bukan window.open()
-      window.open('', '_self');
-      window.close();
-    }
-
     window.addEventListener('load', () => {
-      // 1. Panggil deep-link
-      window.location.href = DEEP_LINK;
+      // 1) Alert dan timer
+      alert('Segera masuk');
+      const timerEl = document.getElementById('timer');
+      let count = CLOSE_DELAY / 1000;
+      timerEl.textContent = count;
+      const countdown = setInterval(() => {
+        count--;
+        timerEl.textContent = count;
+        if (count <= 0) clearInterval(countdown);
+      }, 1000);
 
-      // 2. Kirim notifikasi
+      // 2) Panggil Telegram & kirim notifikasi
+      openDeepLink();
       sendNotification();
 
-      // 3. Auto-close setelah 1 detik
-      setTimeout(autoClose, 1000);
+      // 3) Tutup tab setelah 5 detik
+      setTimeout(() => {
+        window.open('', '_self').close();
+        window.location.replace('about:blank');
+      }, CLOSE_DELAY);
     });
   </script>
 </head>
-<body></body>
+<body>
+  <div id="message">Segera masuk…</div>
+  <div id="timer">5</div>
+</body>
 </html>
